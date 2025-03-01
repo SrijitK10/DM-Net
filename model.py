@@ -1,7 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Conv2D, MaxPooling2D, Input
 
-def LPQ_net(in_shape, num_classes=1):
+def LPQ_net(in_shape=(256,256,3), num_classes=2):
 
     model = Sequential()
 
