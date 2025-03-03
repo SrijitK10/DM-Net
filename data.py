@@ -1,10 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
-import cv2
-import os
 from sklearn.utils import shuffle
-
 
 def load_samples(csv_file):
     """Load image paths and labels from a CSV file."""
@@ -12,47 +9,54 @@ def load_samples(csv_file):
     samples = list(zip(data['Path'], data['Truth']))
     return samples
 
-
-def data_generator(samples, img_size=256, batch_size=32, num_classes=2, mode="train"):
+def data_generator(samples, img_size=(256, 256), batch_size=32, shuffle_data=True, num_classes=2):
     """
-    General-purpose data generator for training, validation, and testing.
-    Parameters:
-        - samples: List of (image_path, label)
-        - img_size: Target image size
-        - batch_size: Batch size
-        - num_classes: Number of output classes
-        - mode: "train", "val", or "test"
+    Yields batches of images and labels for training.
     """
     num_samples = len(samples)
     
-    while True:  # Infinite loop for generator
-        if mode == "train":
-            samples = shuffle(samples)  # Shuffle only for training
-        
+    while True:  # Infinite generator loop
+        if shuffle_data:
+            samples = shuffle(samples)
+
         for offset in range(0, num_samples, batch_size):
-            batch_samples = samples[offset: offset + batch_size]
-            X_batch, y_batch = [], []
+            batch_samples = samples[offset : offset + batch_size]
+
+            X_train = []
+            y_train = []
 
             for img_path, label in batch_samples:
-                if not os.path.exists(img_path):
-                    print(f"Warning: Missing image {img_path}")  # Log missing images
-                    continue
-                
-                img = cv2.imread(img_path)
-                if img is None:
-                    print(f"Error: Could not load {img_path}")  # Log unreadable images
-                    continue
-                
-                img = cv2.resize(img, (img_size, img_size))
-                # img = img.astype(np.float32) / 255.0  # Normalize
-                
-                X_batch.append(img)
-                y_batch.append(label)
+                try:
+                    # Load image
+                    img = np.load(img_path)
 
-            if not X_batch:  # Skip if no valid images
-                continue
-            
-            X_batch = np.array(X_batch)
-            y_batch = tf.keras.utils.to_categorical(np.array(y_batch), num_classes=num_classes)
+                    # Debugging: Check for invalid images
+                    if img is None or img.size == 0:
+                        print(f"Skipping empty image: {img_path}")
+                        continue
 
-            yield X_batch, y_batch
+                    if img.shape != (256, 256, 3):
+                        print(f"Skipping incorrect shape {img.shape}: {img_path}")
+                        continue
+
+                    # Convert data type to float32 and normalize
+                    img = img.astype(np.float32) / 255.0  
+
+                    X_train.append(img)
+                    y_train.append(label)
+
+                except Exception as e:
+                    print(f"Error loading {img_path}: {e}")
+                    continue  # Skip problematic images
+
+            if not X_train:
+                continue  # Skip empty batch
+
+            # Convert to NumPy arrays
+            X_train = np.array(X_train, dtype=np.float32)  
+            y_train = np.array(y_train, dtype=np.int32)
+
+            # One-hot encode labels
+            y_train = tf.keras.utils.to_categorical(y_train, num_classes=num_classes)
+
+            yield X_train, y_train

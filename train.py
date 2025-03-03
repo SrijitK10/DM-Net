@@ -85,7 +85,7 @@ def main():
     model.compile(loss='binary_crossentropy', optimizer=opti, metrics=['accuracy'])
 
     # Model saving path
-    model_filepath = './models/DM_NET2.keras'
+    model_filepath = './models/DM_NET_DCT.keras'
 
     # Callbacks
     checkpoint = ModelCheckpoint(model_filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')

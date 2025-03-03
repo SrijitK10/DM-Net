@@ -2,3 +2,4 @@
 /__pycache__
 /datasets
 /models
+/processed_dct_log_scaled
