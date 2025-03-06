@@ -1,45 +1,67 @@
 import torch
+import torch.nn as nn
+import torch.optim as optim
 from tqdm import tqdm
-from utils import calculate_accuracy
+from config import Config
+from model import SwinTinyBinary
+from data_loader import get_dataloaders
+from utils import plot_metrics
 
-# Training function
-def train_one_epoch(model, dataloader, optimizer, criterion, device):
-    model.train()
-    running_loss = 0.0
-    correct, total = 0, 0
-    loop = tqdm(dataloader, total=len(dataloader))
+def train_model():
+    train_loader, val_loader, _ = get_dataloaders()
+    model = SwinTinyBinary().to(Config.device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.AdamW(model.parameters(), lr=Config.learning_rate)
 
-    for images, labels in loop:
-        images, labels = images.to(device), labels.to(device).float().unsqueeze(1)  # Ensure labels are [batch_size, 1]
+    best_val_acc = 0.0
+    train_losses, val_losses, train_accs, val_accs = [], [], [], []
 
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+    for epoch in range(Config.num_epochs):
+        model.train()
+        train_loss, correct, total = 0, 0, 0
+        progress_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{Config.num_epochs}")
 
-        running_loss += loss.item()
-        correct += (outputs > 0.5).eq(labels).sum().item()  # Apply threshold to probabilities
-        total += labels.size(0)
-
-        loop.set_description(f"Train Loss: {loss.item():.4f}")
-
-    return running_loss / len(dataloader), correct / total * 100
-
-# Validation function
-def validate(model, dataloader, criterion, device):
-    model.eval()
-    running_loss = 0.0
-    correct, total = 0, 0
-
-    with torch.no_grad():
-        for images, labels in dataloader:
-            images, labels = images.to(device), labels.to(device).float().unsqueeze(1)  # Ensure labels are [batch_size, 1]
+        for images, labels in progress_bar:
+            images, labels = images.to(Config.device), labels.to(Config.device)
+            optimizer.zero_grad()
             outputs = model(images)
             loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
-            running_loss += loss.item()
-            correct += (outputs > 0.5).eq(labels).sum().item()  # Apply threshold to probabilities
+            train_loss += loss.item()
+            preds = torch.argmax(outputs, dim=1)
+            correct += (preds == labels).sum().item()
             total += labels.size(0)
 
-    return running_loss / len(dataloader), correct / total * 100
+        train_acc = correct / total
+        train_losses.append(train_loss / len(train_loader))
+        train_accs.append(train_acc)
+
+        # Validation
+        model.eval()
+        val_loss, correct, total = 0, 0, 0
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(Config.device), labels.to(Config.device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+
+                val_loss += loss.item()
+                preds = torch.argmax(outputs, dim=1)
+                correct += (preds == labels).sum().item()
+                total += labels.size(0)
+
+        val_acc = correct / total
+        val_losses.append(val_loss / len(val_loader))
+        val_accs.append(val_acc)
+
+        print(f"Epoch [{epoch+1}/{Config.num_epochs}], Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}")
+
+        # Save best model
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            torch.save(model.state_dict(), Config.checkpoint_path)
+            print("Checkpoint Saved!")
+
+    plot_metrics(train_losses, val_losses, train_accs, val_accs)

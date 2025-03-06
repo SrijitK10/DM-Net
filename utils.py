@@ -1,18 +1,31 @@
-import torch
+import matplotlib.pyplot as plt
+from torchinfo import summary
+from model import SwinTinyBinary
+from config import Config
 
-# Save the best model checkpoint
-def save_checkpoint(model, optimizer, epoch, best_val_acc, filename="best_swin_model.pth"):
-    checkpoint = {
-        "epoch": epoch,
-        "model_state_dict": model.state_dict(),
-        "optimizer_state_dict": optimizer.state_dict(),
-        "best_val_acc": best_val_acc,
-    }
-    torch.save(checkpoint, filename)
-    print(f"✅ Model Saved! Best Validation Accuracy: {best_val_acc:.2f}%")
+def plot_metrics(train_losses, val_losses, train_accs, val_accs):
+    plt.figure(figsize=(12, 5))
+    
+    # Loss plot
+    plt.subplot(1, 2, 1)
+    plt.plot(train_losses, label='Train Loss')
+    plt.plot(val_losses, label='Val Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title('Loss Curve')
 
-# Calculate Accuracy
-def calculate_accuracy(outputs, labels):
-    preds = outputs > 0.5  # Apply threshold to probabilities
-    correct = (preds == labels).sum().item()
-    return correct / labels.size(0) * 100
+    # Accuracy plot
+    plt.subplot(1, 2, 2)
+    plt.plot(train_accs, label='Train Accuracy')
+    plt.plot(val_accs, label='Val Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
+    plt.title('Accuracy Curve')
+
+    plt.show()
+
+def print_model_summary():
+    model = SwinTinyBinary().to(Config.device)
+    print(model)
