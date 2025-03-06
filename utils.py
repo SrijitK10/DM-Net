@@ -28,4 +28,4 @@ def plot_metrics(train_losses, val_losses, train_accs, val_accs):
 
 def print_model_summary():
     model = SwinTinyBinary().to(Config.device)
-    print(model)
+    print(summary(model, verbose=2))    
