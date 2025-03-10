@@ -14,31 +14,31 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 batch_size = 32
 
 
-def main(args):
+def main():
     # Define image shape based on input type
-    img_size = 256
+    img_size = (256,256)
     img_shape = (img_size,img_size,3)
 
     
     batch_size = 32
-    test_data_path = "./csv/test.csv"  # Path to the training data
+    test_data_path = "./validation.csv"  # Path to the training data
 
     test_samples = load_samples(test_data_path)
 
     print(len(test_samples))
 
     test_generator = data_generator(
-        test_samples, batch_size,  img_size=img_size
+        test_samples, batch_size, 
     )
 
     # Load the model
-    model = tf.keras.models.load_model("./models/DM_NET.keras")
+    model = tf.keras.models.load_model("./models/DM_NET_DCT.keras")
         
     batch_size = 32
 
     # Evaluate the model
     
-    results = model.evaluate(test_generator, batch_size=batch_size, verbose=1)
+    results = model.evaluate(test_generator, batch_size=batch_size, verbose=1,steps = len(test_samples))
     print("Test loss:", results[0])
     print("Test accuracy:", results[1])
 
