@@ -8,7 +8,7 @@ from data_loader import get_dataloaders
 from utils import plot_metrics
 
 def train_model():
-    train_loader, val_loader, _ = get_dataloaders()
+    train_loader, val_loader = get_dataloaders()
     model = SwinTinyBinary().to(Config.device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=Config.learning_rate)
