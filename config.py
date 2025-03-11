@@ -7,4 +7,4 @@ class Config:
     learning_rate = 1e-4
     checkpoint_path = "best_swin_tiny.pth"
     num_classes = 2  # Binary classification
-    device = torch.device("mps" if torch.cuda.is_available() else "cpu")
+    device = torch.device("mps")
