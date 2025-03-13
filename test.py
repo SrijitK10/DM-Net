@@ -13,6 +13,11 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 batch_size = 32
 
+# def fft_layer(x):
+#     x = tf.signal.fft2d(tf.cast(x, tf.complex64))
+#     return tf.abs(x)
+
+# Load the model with the custom function
 
 def main():
     # Define image shape based on input type
@@ -21,18 +26,19 @@ def main():
 
     
     batch_size = 32
-    test_data_path = "./validation.csv"  # Path to the training data
+    test_data_path = "./csv/test.csv"  # Path to the training data
 
     test_samples = load_samples(test_data_path)
 
     print(len(test_samples))
 
     test_generator = data_generator(
-        test_samples, batch_size, 
+        test_samples, batch_size,
     )
 
     # Load the model
-    model = tf.keras.models.load_model("./models/DM_NET_DCT.keras")
+    model = tf.keras.models.load_model("./models/DM_NET_DFT2.keras", custom_objects={"fft_layer": fft_layer}
+)
         
     batch_size = 32
 

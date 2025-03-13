@@ -72,8 +72,8 @@ def main():
     print(f"Validation samples: {len(validation_samples)}")
 
     # Data generators
-    train_generator = data_generator(train_samples, img_size=img_size, batch_size=batch_size, num_classes=num_classes)
-    validation_generator = data_generator(validation_samples, img_size=img_size, batch_size=batch_size, num_classes=num_classes)
+    train_generator = data_generator(train_samples, batch_size=batch_size, num_classes=num_classes)
+    validation_generator = data_generator(validation_samples,  batch_size=batch_size, num_classes=num_classes)
 
     # Create and compile the model
     model = LPQ_net(in_shape=(img_size, img_size, 3), num_classes=num_classes)
@@ -83,9 +83,10 @@ def main():
 
     # Compile model
     model.compile(loss='binary_crossentropy', optimizer=opti, metrics=['accuracy'])
+    print(model.summary())
 
     # Model saving path
-    model_filepath = './models/DM_NET_DCT.keras'
+    model_filepath = './models/DM_NET_DCT2.keras'
 
     # Callbacks
     checkpoint = ModelCheckpoint(model_filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
