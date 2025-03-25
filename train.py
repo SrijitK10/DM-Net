@@ -16,7 +16,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 # Hyperparameters
 batch_size = 32
 learning_rate = 0.01
-epochs = 30
+epochs = 20
 num_classes = 2
 
 def plot_and_save(history, save_dir='./training_plots'):
@@ -86,7 +86,7 @@ def main():
     print(model.summary())
 
     # Model saving path
-    model_filepath = './models/DM_NET_DCT2.keras'
+    model_filepath = './models/DM_NET_PowerSpectra.keras'
 
     # Callbacks
     checkpoint = ModelCheckpoint(model_filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
