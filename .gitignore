@@ -3,3 +3,7 @@
 /datasets
 /models
 /processed_dct_log_scaled
+/image-data
+/powerspectra
+/ckpt
+/GradCAM-master
