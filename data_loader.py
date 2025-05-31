@@ -8,15 +8,15 @@ from from_numpy import NumpyDataset
 def get_dataloaders():
     
 
-    train_dataset = NumpyDataset(os.path.join(Config.data_dir, "train"))
-    val_dataset = NumpyDataset(os.path.join(Config.data_dir, "val"))
+    # train_dataset = NumpyDataset(os.path.join(Config.data_dir, "train"))
+    # val_dataset = NumpyDataset(os.path.join(Config.data_dir, "val"))
     test_dataset = NumpyDataset(os.path.join(Config.data_dir, "test"))
 
-    train_loader = DataLoader(train_dataset, batch_size=Config.batch_size, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=Config.batch_size, shuffle=False, num_workers=4)
+    # train_loader = DataLoader(train_dataset, batch_size=Config.batch_size, shuffle=True, num_workers=4)
+    # val_loader = DataLoader(val_dataset, batch_size=Config.batch_size, shuffle=False, num_workers=4)
     test_loader = DataLoader(test_dataset, batch_size=Config.batch_size, shuffle=False, num_workers=4)
 
-    return train_loader, val_loader, test_loader
+    return test_loader
 
 # import os
 # import torchvision.transforms as transforms
@@ -30,15 +30,15 @@ def get_dataloaders():
 #         transforms.ToTensor(),
 #     ])
 
-#     train_dataset = datasets.ImageFolder(os.path.join(Config.data_dir, "train"), transform=transform)
-#     val_dataset = datasets.ImageFolder(os.path.join(Config.data_dir, "val"), transform=transform)
+#     # train_dataset = datasets.ImageFolder(os.path.join(Config.data_dir, "train"), transform=transform)
+#     # val_dataset = datasets.ImageFolder(os.path.join(Config.data_dir, "val"), transform=transform)
 #     test_dataset = datasets.ImageFolder(os.path.join(Config.data_dir, "test"), transform=transform)
 
-#     train_loader = DataLoader(train_dataset, batch_size=Config.batch_size, shuffle=True, num_workers=4)
-#     val_loader = DataLoader(val_dataset, batch_size=Config.batch_size, shuffle=False, num_workers=4)
+#     # train_loader = DataLoader(train_dataset, batch_size=Config.batch_size, shuffle=True, num_workers=4)
+#     # val_loader = DataLoader(val_dataset, batch_size=Config.batch_size, shuffle=False, num_workers=4)
 #     test_loader = DataLoader(test_dataset, batch_size=Config.batch_size, shuffle=False, num_workers=4)
 
-#     return train_loader, val_loader, test_loader
+#     return test_loader
 
 
 
