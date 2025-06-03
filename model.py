@@ -15,7 +15,7 @@ def LPQ_net(in_shape=(256,256,3), num_classes=2):
 
     model.add(Input(shape=in_shape))
 
-    # # Apply FFT as the first layer
+    # Apply FFT as the first layer
     # model.add(Lambda(fft_layer, name="fft_layer"))
 
     model.add(Conv2D(32, kernel_size=(3, 3), name='convRes', activation='relu'))

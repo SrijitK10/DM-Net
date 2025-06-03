@@ -86,7 +86,7 @@ def main():
     print(model.summary())
 
     # Model saving path
-    model_filepath = './models/DM_NET_PowerSpectra.keras'
+    model_filepath = './models/DM_NET_DCT_FINAL.keras'
 
     # Callbacks
     checkpoint = ModelCheckpoint(model_filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')

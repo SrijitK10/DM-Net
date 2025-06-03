@@ -13,9 +13,9 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 batch_size = 32
 
-# def fft_layer(x):
-#     x = tf.signal.fft2d(tf.cast(x, tf.complex64))
-#     return tf.abs(x)
+def fft_layer(x):
+    x = tf.signal.fft2d(tf.cast(x, tf.complex64))
+    return tf.abs(x)
 
 # Load the model with the custom function
 
@@ -37,9 +37,8 @@ def main():
     )
 
     # Load the model
-    model = tf.keras.models.load_model("./models/DM_NET_DFT2.keras", custom_objects={"fft_layer": fft_layer}
-)
-        
+    # model = tf.keras.models.load_model("./models/DM_NET_DFT2.keras", custom_objects={"fft_layer": fft_layer})
+    model = tf.keras.models.load_model("./models/DM_NET_DCT2.keras")
     batch_size = 32
 
     # Evaluate the model
