@@ -3,8 +3,8 @@ import csv
 import random
 
 # Directories containing your images
-directory_real = '/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/datasets/test/0_real'
-directory_fake = '/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/datasets/test/1_fake'
+directory_real = '/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/deepfake_eval_25/0_real'
+directory_fake = '/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/deepfake_eval_25/1_fake'
 
 # Get a list of all file paths in the directory and its subdirectories
 def get_file_paths(directory, label):

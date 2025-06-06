@@ -36,10 +36,10 @@ def data_generator(samples,  batch_size=32, shuffle_data=True, num_classes=2):
             for img_path, label in batch_samples:
                 try:
                     # Load image 
-                    img = cv2.imread(img_path)
-                    img = cv2.resize(img, (256,256))
+                    # img = cv2.imread(img_path)
+                    # img = cv2.resize(img, (256,256))
                     # # img= dct2(img)
-                    # img = np.load(img_path)
+                    img = np.load(img_path)
 
                     
 
