@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, 
-    confusion_matrix, classification_report, roc_auc_score, roc_curve
+    confusion_matrix, classification_report, roc_auc_score, roc_curve,auc
 )
 from config import Config
 from model import SwinTinyBinary
 from data_loader import get_dataloaders
 
 def test_model():
-    test_loader = get_dataloaders()
+    _,_,test_loader = get_dataloaders()
     
     # Load the trained model
     model = SwinTinyBinary().to(Config.device)
@@ -44,13 +44,15 @@ def test_model():
     recall = recall_score(all_labels, all_preds, average="binary")
     f1 = f1_score(all_labels, all_preds, average="binary")
     roc_auc = roc_auc_score(all_labels, all_probs)
+    fpr, tpr, _ = roc_curve(all_labels, all_probs)
+    auc_score = auc(fpr, tpr)
 
     print("\nTest Results:")
     print(f"Accuracy:  {accuracy:.4f}")
     print(f"Precision: {precision:.4f}")
     print(f"Recall:    {recall:.4f}")
     print(f"F1 Score:  {f1:.4f}")
-    print(f"ROC-AUC:   {roc_auc:.4f}")
+    print(f"ROC-AUC:   {auc_score:.4f}")
     print("\nClassification Report:")
     print(classification_report(all_labels, all_preds, target_names=["REAL", "FAKE"]))
 
