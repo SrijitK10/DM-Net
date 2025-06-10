@@ -9,6 +9,7 @@ from keras.models import Model
 from data import load_samples
 import argparse
 from tqdm import tqdm
+import matplot2tikz
 
 def load_data_arrays(numpy_arrays, labels):
     """
@@ -41,6 +42,7 @@ def load_data_arrays(numpy_arrays, labels):
                 
             # Convert data type to float32
             img = img.astype(np.float32)
+            label = int(label)  # Ensure label is an integer
             
             X.append(img)
             y.append(label)
@@ -63,9 +65,35 @@ def extract_features(model, layer_name, data):
     Returns:
         features: Extracted features
     """
-    # Create a new model that outputs the selected layer's activations
-    feature_model = Model(inputs=model.input, 
-                         outputs=model.get_layer(layer_name).output)
+    # For sequential model, we need to create a new model with specified input and output
+    try:
+        # First, ensure the model has been built by passing a sample through it
+        sample_data = data[0:1]  # Take first sample as a dummy input
+        _ = model(sample_data)  # This builds the model
+        
+        # Now create a feature extraction model
+        feature_model = Model(inputs=model.input, 
+                             outputs=model.get_layer(layer_name).output)
+    except Exception as e:
+        print(f"Error creating feature model: {e}")
+        print("Trying alternative approach...")
+        
+        # Alternative approach: create intermediate model
+        feature_model = tf.keras.Sequential()
+        
+        # Copy layers up to the target layer
+        found_layer = False
+        for layer in model.layers:
+            feature_model.add(layer)
+            if layer.name == layer_name:
+                found_layer = True
+                break
+        
+        if not found_layer:
+            print(f"Layer '{layer_name}' not found. Available layers:")
+            for i, layer in enumerate(model.layers):
+                print(f"{i}: {layer.name}")
+            raise ValueError(f"Layer '{layer_name}' not found in model")
     
     # Extract features in batches to avoid memory issues
     batch_size = 32
@@ -103,19 +131,34 @@ def plot_tsne(features, labels, output_path='tsne_plot.png', perplexity=30, n_co
     plt.figure(figsize=(10, 8))
     
     if n_components == 2:
-        # 2D plot
-        scatter = plt.scatter(features_tsne[:, 0], features_tsne[:, 1], 
-                     c=labels, alpha=0.6, cmap='coolwarm')
-        plt.colorbar(scatter, label='Class')
+        # 2D plot with discrete classes instead of continuous color bar
+        # Create a scatter plot for each class
+        real_mask = labels == 0
+        fake_mask = labels == 1
+        
+        plt.scatter(features_tsne[real_mask, 0], features_tsne[real_mask, 1], 
+                   alpha=0.6, c='blue', label='Real')
+        plt.scatter(features_tsne[fake_mask, 0], features_tsne[fake_mask, 1], 
+                   alpha=0.6, c='red', label='Fake')
+        
+        plt.legend(title='Class')
         plt.xlabel('t-SNE dimension 1')
         plt.ylabel('t-SNE dimension 2')
+        matplot2tikz.save("test.tex")
     else:
-        # 3D plot
+        # 3D plot with discrete classes
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
-        scatter = ax.scatter(features_tsne[:, 0], features_tsne[:, 1], features_tsne[:, 2], 
-                  c=labels, alpha=0.6, cmap='coolwarm')
-        plt.colorbar(scatter, label='Class')
+        
+        real_mask = labels == 0
+        fake_mask = labels == 1
+        
+        ax.scatter(features_tsne[real_mask, 0], features_tsne[real_mask, 1], features_tsne[real_mask, 2],
+                  alpha=0.6, c='blue', label='Real')
+        ax.scatter(features_tsne[fake_mask, 0], features_tsne[fake_mask, 1], features_tsne[fake_mask, 2],
+                  alpha=0.6, c='red', label='Fake')
+        
+        ax.legend(title='Class')
         ax.set_xlabel('t-SNE dimension 1')
         ax.set_ylabel('t-SNE dimension 2')
         ax.set_zlabel('t-SNE dimension 3')
@@ -143,6 +186,8 @@ def main():
                         help='Path to save the output plot')
     parser.add_argument('--max_samples', type=int, default=1000,
                         help='Maximum number of samples to use (to avoid memory issues)')
+    parser.add_argument('--list_layers', action='store_true',
+                        help='List all layer names in the model and exit')
     
     args = parser.parse_args()
     
@@ -150,6 +195,13 @@ def main():
     print(f"Loading model from {args.model}...")
     model = tf.keras.models.load_model(args.model)
     model.summary()
+    
+    # If --list_layers is specified, print all layer names and exit
+    if args.list_layers:
+        print("\nAvailable layers:")
+        for i, layer in enumerate(model.layers):
+            print(f"{i}: {layer.name} (type: {layer.__class__.__name__}, shape: {layer.output_shape if hasattr(layer, 'output_shape') else 'unknown'})")
+        return
     
     # Load sample data from CSV
     print(f"Loading samples from {args.csv}...")
