@@ -11,7 +11,7 @@ from model import SwinTinyBinary
 from data_loader import get_dataloaders
 
 def test_model():
-    _,_,test_loader = get_dataloaders()
+    test_loader = get_dataloaders()
     
     # Load the trained model
     model = SwinTinyBinary().to(Config.device)

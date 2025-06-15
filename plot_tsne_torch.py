@@ -136,9 +136,9 @@ def plot_tsne(features, labels=None, output_path='tsne_plot.png', perplexity=30,
             fake_mask = labels == 1
             
             plt.scatter(features_tsne[real_mask, 0], features_tsne[real_mask, 1], 
-                       alpha=0.6, c="#6df5bf", label='Real')
+                       alpha=0.6, c='blue', label='Real')
             plt.scatter(features_tsne[fake_mask, 0], features_tsne[fake_mask, 1], 
-                       alpha=0.6, c='#97a2ff', label='Fake')
+                       alpha=0.6, c='red', label='Fake')
             
             plt.legend(title='Class')
             plt.xlabel('t-SNE dimension 1')
