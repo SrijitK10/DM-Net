@@ -8,3 +8,13 @@
 /test
 /ps
 /deepfake_eval_25
+/average_blur3x3
+/average_blur5x5
+/clahe
+/gaussian_noise1.0
+/gaussian_noise2.0
+/median_filter3x3
+/median_filter5x5
+/gamma0.8
+/gamma1.2
+/gamma0.9
