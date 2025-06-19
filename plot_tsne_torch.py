@@ -127,39 +127,51 @@ def plot_tsne(features, labels=None, output_path='tsne_plot.png', perplexity=30,
     
     # Plot the results
     plt.figure(figsize=(10, 8))
-    
+
+    label_font = {'fontsize': 22, 'fontweight': 'bold'}
+    title_font = {'fontsize': 26, 'fontweight': 'bold', 'fontname': 'DejaVu Sans'}
+    tick_fontsize = 20
+    legend_fontsize = 22
+    legend_title_fontsize = 22
+
     if labels is not None:
         # Plot with class labels
         if n_components == 2:
             # 2D plot with discrete classes
             real_mask = labels == 0
             fake_mask = labels == 1
-            
             plt.scatter(features_tsne[real_mask, 0], features_tsne[real_mask, 1], 
-                       alpha=0.6, c='blue', label='Real')
+                       alpha=0.6, c="#6df5bf", label='Real')
             plt.scatter(features_tsne[fake_mask, 0], features_tsne[fake_mask, 1], 
-                       alpha=0.6, c='red', label='Fake')
-            
-            plt.legend(title='Class')
-            plt.xlabel('t-SNE dimension 1')
-            plt.ylabel('t-SNE dimension 2')
+                       alpha=0.6, c='#97a2ff', label='Fake')
+            leg = plt.legend(fontsize=legend_fontsize, prop={'weight': 'bold'})
+            plt.setp(leg.get_texts(), fontsize=legend_fontsize, fontweight='bold')
+            if leg.get_title() is not None:
+                plt.setp(leg.get_title(), fontsize=legend_title_fontsize, fontweight='bold')
+            plt.xlabel('t-SNE dimension 1', **label_font)
+            plt.ylabel('t-SNE dimension 2', **label_font)
+            plt.title('t-SNE visualization', fontdict=title_font)
+            plt.xticks(fontsize=tick_fontsize, fontweight='bold')
+            plt.yticks(fontsize=tick_fontsize, fontweight='bold')
         else:
             # 3D plot with discrete classes
             fig = plt.figure(figsize=(10, 8))
             ax = fig.add_subplot(111, projection='3d')
-            
             real_mask = labels == 0
             fake_mask = labels == 1
-            
             ax.scatter(features_tsne[real_mask, 0], features_tsne[real_mask, 1], features_tsne[real_mask, 2],
                       alpha=0.6, c='blue', label='Real')
             ax.scatter(features_tsne[fake_mask, 0], features_tsne[fake_mask, 1], features_tsne[fake_mask, 2],
                       alpha=0.6, c='red', label='Fake')
-            
-            ax.legend(title='Class')
-            ax.set_xlabel('t-SNE dimension 1')
-            ax.set_ylabel('t-SNE dimension 2')
-            ax.set_zlabel('t-SNE dimension 3')
+            leg = ax.legend(title='Class', fontsize=legend_fontsize, title_fontsize=legend_title_fontsize, prop={'weight': 'bold'})
+            plt.setp(leg.get_texts(), fontsize=legend_fontsize, fontweight='bold')
+            if leg.get_title() is not None:
+                plt.setp(leg.get_title(), fontsize=legend_title_fontsize, fontweight='bold')
+            ax.set_xlabel('t-SNE dimension 1', fontsize=22, fontweight='bold')
+            ax.set_ylabel('t-SNE dimension 2', fontsize=22, fontweight='bold')
+            ax.set_zlabel('t-SNE dimension 3', fontsize=22, fontweight='bold')
+            ax.set_title('t-SNE visualization', fontdict=title_font)
+            ax.tick_params(axis='both', which='major', labelsize=tick_fontsize, labelweight='bold')
     else:
         # Plot without class labels
         if n_components == 2:
@@ -174,7 +186,7 @@ def plot_tsne(features, labels=None, output_path='tsne_plot.png', perplexity=30,
             ax.set_ylabel('t-SNE dimension 2')
             ax.set_zlabel('t-SNE dimension 3')
     
-    plt.title('t-SNE visualization')
+    # Don't add another title here, it overrides the formatted one
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
     print(f"t-SNE plot saved to {output_path}")

@@ -129,22 +129,30 @@ def plot_tsne(features, labels, output_path='tsne_plot.png', perplexity=30, n_co
     
     # Plot the results
     plt.figure(figsize=(10, 8))
-    
+
+    bold = {'fontweight': 'bold'}
+    label_font = {'fontsize': 22, 'fontweight': 'bold'}
+    title_font = {'fontsize': 26, 'fontweight': 'bold'}
+    tick_fontsize = 20
+    legend_fontsize = 20  # Large legend font size
+    legend_title_fontsize = 22
+
     if n_components == 2:
-        # 2D plot with discrete classes instead of continuous color bar
-        # Create a scatter plot for each class
         real_mask = labels == 0
         fake_mask = labels == 1
-        
+
         plt.scatter(features_tsne[real_mask, 0], features_tsne[real_mask, 1], 
-                   alpha=0.6, c='blue', label='Real')
+               alpha=0.6, c="#6df5bf", label='Real')
         plt.scatter(features_tsne[fake_mask, 0], features_tsne[fake_mask, 1], 
-                   alpha=0.6, c='red', label='Fake')
-        
-        plt.legend(title='Class')
-        plt.xlabel('t-SNE dimension 1')
-        plt.ylabel('t-SNE dimension 2')
-        matplot2tikz.save("test.tex")
+               alpha=0.6, c='#97a2ff', label='Fake')
+
+        leg = plt.legend(fontsize=legend_fontsize, prop={'weight': 'bold'})
+        plt.setp(leg.get_texts(), fontsize=legend_fontsize, fontweight='bold')
+        plt.xlabel('t-SNE dimension 1', **label_font)
+        plt.ylabel('t-SNE dimension 2', **label_font)
+        plt.title('t-SNE visualization', **title_font)
+        plt.xticks(fontsize=tick_fontsize, fontweight='bold')
+        plt.yticks(fontsize=tick_fontsize, fontweight='bold')
     else:
         # 3D plot with discrete classes
         fig = plt.figure(figsize=(10, 8))
