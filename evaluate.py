@@ -1,105 +1,99 @@
-import os
-import cv2
+import tensorflow as tf
 import numpy as np
-from tensorflow import keras
-from tensorflow.keras.models import load_model
-from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score, f1_score
-
-# ==== Configuration ====
-MODEL_PATH = "./models/DM_NET_DCT_FINAL.keras"  # Path to your saved model
-TEST_DIR = "/Users/srijit/Documents/Projects Personal/FREQUENCY/GANDCTAnalysis/processed_dct_log_scaled/test"  # Root directory containing 'real' and 'fake' subfolders
-class_labels = {"0_real": 0, "1_fake": 1}  # Explicit label mapping
-
-def preprocess_image(image):
-
-    """Average Blur"""
-    # kernel_size = (5, 5)
-    # image = cv2.blur(image, kernel_size)
-
-    """Gaussian Noise"""
-    # sigma = 2.0
-    # noise = np.random.normal(0, sigma, image.shape).astype(np.float32)
-    # # Add the noise to the image
-    # noisy_image = image + noise
-    # # Clip the pixel values to the valid range [0, 255]
-    # image = np.clip(noisy_image, 0, 255).astype(np.uint8)
-
-    """Median filter"""
-    # size = 3
-    # image = cv2.medianBlur(image, size)
-
-    """Gamma correction"""
-    # gamma = 1.2
-    # image = image.astype(np.float32)
-    # image /=255.0
-    # image = np.power(image, gamma)
-    # image = np.uint8(image * 255)
-
-    """CLAHE"""
-    # clahe = cv2.createCLAHE(clipLimit=1.0, tileGridSize=(3, 3))
-    # b, g, r = cv2.split(image)
-    # b_enhanced = clahe.apply(b)
-    # g_enhanced = clahe.apply(g)
-    # r_enhanced = clahe.apply(r)
-    # image = cv2.merge([b_enhanced, g_enhanced, r_enhanced])
+import pandas as pd
+import cv2
+import os
+import argparse
+import matplotlib.pyplot as plt
+from sklearn.utils import shuffle
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, auc
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+from data import load_samples, data_generator
 
 
+# Suppress TensorFlow logs
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+# def fft_layer(x):
+#     x = tf.signal.fft2d(tf.cast(x, tf.complex64))
+#     return tf.abs(x)
 
-    return image
-    
+# Hyperparameters
+batch_size = 32
+img_size = 256
+num_classes = 2
 
-# ==== Load Dataset ====
-def load_dataset(folder_path):
-    images, labels = [], []
-    print(f"Loading test dataset from: {folder_path}...")
 
-    for folder in os.listdir(folder_path):
-        if folder not in class_labels:
-            continue
-        label = class_labels[folder]
-        subfolder_path = os.path.join(folder_path, folder)
-
-        for file in os.listdir(subfolder_path):
-            img_path = os.path.join(subfolder_path, file)
-            # image = cv2.imread(img_path)
-            image = np.load(img_path)
-            if image is None:
-                continue
-            # image = cv2.resize(image, IMAGE_SIZE, interpolation=cv2.INTER_CUBIC)  # Bicubic interpolation
-            images.append(image)
-            labels.append(label)
-
-    images = np.array(images, dtype='float32') # Normalize to [0, 1]
-    labels = np.array(labels, dtype='int32')
-    return images, labels
-
-# ==== Evaluation ====
-def evaluate_model():
-    # Load model
-    model = load_model(MODEL_PATH)
 
     # Load test data
-    X_test, y_test = load_dataset(TEST_DIR)
+test_data_path = "./csv/test.csv"    
 
-    # Predict probabilities
-    pred_probs = model.predict(X_test)
-    pred_labels = (pred_probs > 0.5).astype(int).flatten()
+test_samples = load_samples(test_data_path)
 
-    # Evaluation metrics
-    accuracy = accuracy_score(y_test, pred_labels)
-    auc = roc_auc_score(y_test, pred_probs)
-    precision_fake = precision_score(y_test, pred_labels, pos_label=1)
-    recall_fake = recall_score(y_test, pred_labels, pos_label=1)
-    f1_fake = f1_score(y_test, pred_labels, pos_label=1)
+print(f"Number of test samples: {len(test_samples)}")
 
-    # Print results
-    print("\n=== Evaluation Results ===")
-    print(f"Accuracy         : {accuracy:.4f}")
-    print(f"AUC              : {auc:.4f}")
-    # print(f"Precision (Fake) : {precision_fake:.4f}")
-    # print(f"Recall (Fake)    : {recall_fake:.4f}")
-    # print(f"F1 Score (Fake)  : {f1_fake:.4f}")
+# Create test data generator
+test_generator = data_generator(test_samples, batch_size=batch_size,  num_classes=num_classes)
 
-# ==== Run ====
-if __name__ == "__main__":
-    evaluate_model()
+# Load the trained model
+model = tf.keras.models.load_model('/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/models/DM_NET_Powerspectra.keras')
+# model = tf.keras.models.load_model("./models/DM_NET_DCT_FINAL.keras")
+
+    # Predict on test set
+y_true = []
+
+y_pred_probs = []
+    
+for batch_x, batch_y in test_generator:
+    y_true.extend(np.argmax(batch_y, axis=1))  # Convert one-hot labels to class indices
+    y_pred_probs.extend(model.predict(batch_x))  # Get probability scores
+
+    if len(y_true) >= len(test_samples):  # Stop when all samples are processed
+        break
+
+    # Convert lists to numpy arrays
+y_true = np.array(y_true)
+y_pred_probs = np.array(y_pred_probs)[:, 1]  # Take probability of class 1 (FAKE)
+
+    # Convert probabilities to binary predictions (threshold = 0.5)
+y_pred = (y_pred_probs >= 0.5).astype(int)
+
+    # Compute classification metrics
+accuracy = accuracy_score(y_true, y_pred)
+precision = precision_score(y_true, y_pred)
+recall = recall_score(y_true, y_pred)
+f1 = f1_score(y_true, y_pred)
+roc_auc = roc_auc_score(y_true, y_pred_probs)
+
+
+print(f"Accuracy: {accuracy:.4f}")
+print(f"Precision: {precision:.4f}")
+print(f"Recall: {recall:.4f}")
+print(f"F1-score: {f1:.4f}")
+print(f"ROC-AUC Score: {roc_auc:.4f}")
+
+#plot confusion matrix
+
+cm = confusion_matrix(y_true, y_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=['Real', 'Fake'], yticklabels=['Real', 'Fake'])
+plt.xlabel('Predicted')
+plt.ylabel('True')
+plt.title('Confusion Matrix')
+plt.savefig("confusion_matrix.png")
+
+    # Plot ROC-AUC curve
+fpr, tpr, _ = roc_curve(y_true, y_pred_probs)
+plt.figure(figsize=(8, 6))
+plt.plot(fpr, tpr, color='blue', lw=2, label=f'ROC curve (AUC = {roc_auc:.4f})')
+plt.plot([0, 1], [0, 1], color='gray', linestyle='--')  # Diagonal line
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC-AUC Curve")
+plt.legend(loc="lower right")
+plt.grid()
+plt.savefig("roc_auc_curve.png")
+
+
+
+
