@@ -26,7 +26,7 @@ num_classes = 2
 
 
     # Load test data
-test_data_path = "./csv/test.csv"    
+test_data_path = "./test.csv"    
 
 test_samples = load_samples(test_data_path)
 
@@ -36,7 +36,7 @@ print(f"Number of test samples: {len(test_samples)}")
 test_generator = data_generator(test_samples, batch_size=batch_size,  num_classes=num_classes)
 
 # Load the trained model
-model = tf.keras.models.load_model('/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/models/DM_NET_Powerspectra.keras')
+model = tf.keras.models.load_model('/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/models/DM_NET.keras')
 # model = tf.keras.models.load_model("./models/DM_NET_DCT_FINAL.keras")
 
     # Predict on test set
