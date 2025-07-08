@@ -1,14 +1,17 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Conv2D, MaxPooling2D, Input, Lambda
-import tensorflow as tf        
-
+import tensorflow as tf 
+      
+def fft_layer(x):
+    x = tf.signal.fft2d(tf.cast(x, tf.complex64))
+    return tf.abs(x)
 
 
 def LPQ_net(in_shape=(256,256,3), num_classes=2):
     model = Sequential()
 
     model.add(Input(shape=in_shape))
-
+    model.add(Lambda(fft_layer, name='fft_layer'))
  
     
 

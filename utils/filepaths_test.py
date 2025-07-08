@@ -3,8 +3,8 @@ import csv
 import random
 
 # Directories containing your images
-directory_real = './deepfake-eval/0_real'
-directory_fake = './deepfake-eval/1_fake'
+directory_real = './gamma1.2/test/0_real'
+directory_fake = './gamma1.2/test/1_fake'
 
 # Get a list of all file paths in the directory and its subdirectories
 def get_file_paths(directory, label):
@@ -15,8 +15,8 @@ def get_file_paths(directory, label):
     return file_paths
 
 # Get file paths for real and fake images
-real_file_paths = get_file_paths(directory_real, '1')  # '0' is the label for real images
-fake_file_paths = get_file_paths(directory_fake, '0')  # '1' is the label for fake images
+real_file_paths = get_file_paths(directory_real, '0')  # '0' is the label for real images
+fake_file_paths = get_file_paths(directory_fake, '1')  # '1' is the label for fake images
 
 # Combine real and fake image paths
 merged_data = real_file_paths + fake_file_paths

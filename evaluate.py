@@ -14,9 +14,9 @@ from data import load_samples, data_generator
 
 # Suppress TensorFlow logs
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-# def fft_layer(x):
-#     x = tf.signal.fft2d(tf.cast(x, tf.complex64))
-#     return tf.abs(x)
+def fft_layer(x):
+    x = tf.signal.fft2d(tf.cast(x, tf.complex64))
+    return tf.abs(x)
 
 # Hyperparameters
 batch_size = 32
@@ -36,8 +36,8 @@ print(f"Number of test samples: {len(test_samples)}")
 test_generator = data_generator(test_samples, batch_size=batch_size,  num_classes=num_classes)
 
 # Load the trained model
-model = tf.keras.models.load_model('/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/models/DM_NET.keras')
-# model = tf.keras.models.load_model("./models/DM_NET_DCT_FINAL.keras")
+# model = tf.keras.models.load_model('/Users/srijit/Documents/Projects Personal/FREQUENCY/DM-Net/models/DM_NET.keras')
+model = tf.keras.models.load_model("./models/DM_NET_DFT_FINAL.keras", custom_objects={'fft_layer': fft_layer})
 
     # Predict on test set
 y_true = []
